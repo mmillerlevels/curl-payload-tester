@@ -1,0 +1,37 @@
+# serverless.yml
+
+service: curl-payload-tester
+
+plugins:
+    - serverless-python-individually
+
+provider:
+    name: aws
+    runtime: python3.8
+    stage: ${opt:stage, 'dev'}
+    region: ${opt:region, 'us-west-2'}
+    stackTags:
+        billingproject: ${self:service}
+    logRetentionInDays: 5
+
+package:
+    individually: True
+    exclude:
+        - '**/*'
+
+functions:
+    postit:
+        handler: postit/handler.lambda_handler
+        memorySize: 128
+        package:
+            include:
+                - postit/**
+        events:
+            - http: 
+                method: post 
+                path: postme
+                cors: true
+
+custom:
+    pyIndividually:
+      wrap:postit: postit/handler.postit
